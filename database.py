@@ -103,7 +103,17 @@ class QwrSql:
         try:
             cur = self.conn.cursor()
             cur.execute("""SELECT o.id, p.name, o.amount_product, o.date_at FROM orders o
-                        INNER JOIN products p ON p.id    def load_percent_material(self, order_id):
+                        INNER JOIN products p ON p.id = o.id_product
+                        WHERE o.id_partner = %s
+                        ORDER BY o.id ASC""", (partner_id, ))
+            res = cur.fetchall()
+            cur.close()
+            return res
+        except mdb.Error as e:
+            print(f"Ошибка получения данных: {e}")
+            raise
+
+    def load_percent_material(self, order_id):
         try:
             cur = self.conn.cursor()
             cur.execute("""SELECT t_m.brak_persent FROM type_materials t_m
@@ -123,7 +133,7 @@ class QwrSql:
     def calc_space(self, order_id):
         try:
             cur = self.conn.cursor()
-            cur.execute("""SELECT (p.weight * p.height) as s FROM products p
+            cur.execute("""SELECT (p.weight * p.height) as s FROM products p 
                         INNER JOIN orders o ON o.id_product = p.id
                         WHERE o.id = %s""", (order_id,))
 
@@ -137,7 +147,7 @@ class QwrSql:
     def load_amount(self, order_id):
         try:
             cur = self.conn.cursor()
-            cur.execute("""SELECT o.amount_product FROM orders o
+            cur.execute("""SELECT o.amount_product FROM orders o 
                         WHERE o.id = %s""", (order_id,))
 
             res = cur.fetchone()
@@ -145,14 +155,4 @@ class QwrSql:
             return res[0] if res and res[0] is not None else 0
         except mdb.Error as e:
             print(f"Ошибка получения данных: {e}")
-            raise = o.id_product
-                        WHERE o.id_partner = %s
-                        ORDER BY o.id ASC""", (partner_id, ))
-            res = cur.fetchall()
-            cur.close()
-            return res
-        except mdb.Error as e:
-            print(f"Ошибка получения данных: {e}")
             raise
-
-
